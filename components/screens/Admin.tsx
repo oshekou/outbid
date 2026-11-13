@@ -355,7 +355,7 @@ function PostCard({ post, approver, handle, slug }: { post: Post; approver: stri
               }
             }}
           >
-            <TextField className="flex-1" label="Posted? Paste the link" placeholder="https://instagram.com/…" value={url} onChange={(e) => setUrl(e.target.value)} inputMode="url" />
+            <TextField className="min-w-0 flex-1" label="Posted? Paste the link" placeholder="https://instagram.com/…" value={url} onChange={(e) => setUrl(e.target.value)} inputMode="url" />
             <SecondaryButton type="submit" variant="navy" className="w-auto px-4" icon={<ExternalLink />}>
               Done
             </SecondaryButton>

@@ -127,7 +127,7 @@ export function Redeem() {
             }}
           >
             <TextField
-              className="flex-1"
+              className="min-w-0 flex-1"
               label="Or type the code"
               placeholder="6 letters under the QR"
               value={code}

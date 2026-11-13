@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+/*
+ * Outbid design tokens (BUILD_PLAN.md section 4).
+ * Tailwind v4 reads tokens from @theme, so this replaces tailwind.config.ts.
+ * Every token is also a CSS variable, e.g. var(--color-navy-900).
+ */
+@theme {
+  --color-navy-900: #061c43;
+  --color-navy-800: #092b57;
+  --color-blue-600: #0767b3;
+  --color-teal-500: #0e8479;
+  --color-green-500: #1baa85;
+  --color-lime-400: #84e81c;
+  --color-lime-50: #edf9db;
+  --color-surface: #f8faff;
+  --color-card: #ffffff;
+  --color-border: #dce3ee;
+
+  /* Supporting shades sampled from the mockups */
+  --color-ink-500: #55657d; /* grey labels and body copy, 5.6:1 on white */
+  --color-chip: #ebf0f6; /* unselected chips */
+  --color-green-700: #0f7a3d; /* text on lime-50 ("Live", "6d 4h left") */
+  --color-mint-50: #e0f5ec;
+  --color-sky-50: #e7f0fb;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-poppins), var(--font-inter), ui-sans-serif, sans-serif;
+
+  --radius-card: 20px;
+}
+
+:root {
+  --header-gradient: linear-gradient(
+    115deg,
+    var(--color-navy-900) 0%,
+    #08488a 38%,
+    var(--color-blue-600) 58%,
+    var(--color-green-500) 100%
+  );
+  --button-gradient: linear-gradient(90deg, #0752b0 0%, var(--color-teal-500) 55%, #1fb84e 100%);
+  --callout-gradient: linear-gradient(100deg, var(--color-lime-50) 0%, var(--color-mint-50) 100%);
+  --bar-gradient: linear-gradient(90deg, var(--color-lime-400) 0%, #2fcf72 100%);
+}
+
+html {
+  background: var(--color-surface);
+}
+
+body {
+  background: var(--color-surface);
+  color: var(--color-navy-900);
+  font-family: var(--font-sans);
+  -webkit-tap-highlight-color: transparent;
+}
+
+@utility bg-header-gradient {
+  background-image: var(--header-gradient);
+}
+@utility bg-button-gradient {
+  background-image: var(--button-gradient);
+}
+@utility bg-callout-gradient {
+  background-image: var(--callout-gradient);
+}
+@utility bg-bar-gradient {
+  background-image: var(--bar-gradient);
+}
+
+/* Section labels: small, bold, uppercase, letter-spaced navy */
+@utility section-label {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}

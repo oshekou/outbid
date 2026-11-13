@@ -4,6 +4,41 @@ Running log against `BUILD_PLAN.md`. Newest at the top.
 
 ## Phase 1: Frontend prototype (mock data)
 
+### Done: step 4 (all screens) + app polish
+
+Live at https://outbid-eta.vercel.app (Vercel deploys this branch on every push).
+
+**App feel**
+- Installable: web app manifest, home-screen icon (the tag mark from the logo), full-screen launch,
+  safe-area padding for notched phones, theme colour.
+- Screens ease in; bottom sheets slide up; pop-up confirmation messages; loading skeletons;
+  "not found" and "closed" states; reduced-motion respected.
+- Back buttons in headers; bottom tab bar on student/bidder screens.
+
+**Screens** (all work against the mock store, all checked at 390px with no sideways scroll)
+- `/` landing page, `/demo` story hub with "View as" and 14 story steps + reset.
+- 01 `/setup`, 02 `/setup/teams`, `/setup/social` (step 3, no mockup). Launching creates a real
+  auction with the five default teams and opens its admin page.
+- 03 join, 04 ask card (real QR, share/copy), 05 business landing, 06 donate item (photo + logo
+  upload resized on the device, success screen with dashboard link).
+- 07 make a post (story/feed/TikTok preview, editable caption, send for approval).
+- 08 business dashboard (views chart, where you appeared, item switcher, scan button).
+- 09 item detail (bid history, quick bids + Other, bidder sign-in sheet with phone + code),
+  10 outbid page, 11 leaderboard (grades + businesses), 12 team leaderboard (squads + individuals).
+- 13 prize pass with "You won, pay now" step before it (demo payment stands in for Every.org),
+  14 scan & redeem (camera scanning via BarcodeDetector where supported, plus a 6-character code).
+- Items list, Me (student and bidder views), Admin (post queue, item queue, join link QR,
+  winners and payment status with 48-hour flag, close bidding).
+
+**Checks**
+- Playwright run of 9 end-to-end flows: join, donate, approve item, new bidder sign-in + bid,
+  too-low bid rejected, outbid + take it back, close + pay + pass, redeem by code, setup wizard.
+- `npm test`: 17 unit tests passing. Lint, typecheck and production build clean.
+
+### Still to do in Phase 1
+- Lighthouse accessibility audit (target 90+).
+- Side-by-side pixel comparison of each screen with its PNG.
+
 ### Done: steps 1–3 (awaiting review before screens)
 
 **Step 1: Scaffold, tokens, shared components**
@@ -58,12 +93,6 @@ Running log against `BUILD_PLAN.md`. Newest at the top.
 - Feature flags in `lib/flags.ts`: `FEATURE_MAX_BID`, `FEATURE_WALLET` (off), `FEATURE_RESHARES`
   (on in Phase 1).
 
-### Next (after approval)
-- Step 4: build the 14 mocked screens in route order, then the unmocked ones.
-- Steps 5–7: wire interactions to the mock store, `/demo` page with "View as", deploy to Vercel.
-
-### Blocked
-- Nothing for Phase 1. Deploying (step 7) needs the Vercel project connected to this repo.
 
 ## Phase 2+
 Not started.

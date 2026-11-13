@@ -9,7 +9,7 @@ export function BullWatermark({ className }: { className?: string }) {
     <svg
       viewBox="0 0 200 180"
       aria-hidden="true"
-      className={cn("pointer-events-none absolute text-green-500/30", className)}
+      className={cn("pointer-events-none absolute text-green-500/20", className)}
       fill="currentColor"
     >
       {/* horns */}

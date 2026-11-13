@@ -8,6 +8,7 @@
 
 import { z } from "zod";
 import { MOCK_NONPROFITS } from "../mock/nonprofits";
+import { defaultGradeTeams } from "../school-year";
 import { squadScores, studentScores, teamScores, type SquadScore, type StudentScore, type TeamScore } from "../scoring";
 import type {
   Auction,
@@ -251,7 +252,7 @@ export async function donateItem(
       title: data.title,
       description: data.description,
       photoPath: data.photoPath,
-      artIcon: "pizza",
+      artIcon: guessArt(`${data.title} ${data.businessName}`),
       retailValueCents: data.retailValueCents,
       uses: data.uses,
       validDays: data.validDays,
@@ -276,7 +277,112 @@ export async function reviewItem(itemId: string, approve: boolean): Promise<Item
   });
 }
 
+/** Pick placeholder art from the item's words until real photos are uploaded. */
+export function guessArt(text: string): Item["artIcon"] {
+  const t = text.toLowerCase();
+  if (/burger|dinner|lunch|restaurant|grill|bbq/.test(t)) return "burger";
+  if (/coffee|cafe|café|tea|espresso|bakery/.test(t)) return "coffee";
+  if (/climb|hike|gym|yoga|fitness|surf|ski/.test(t)) return "climb";
+  if (/guitar|music|piano|lesson|concert|band/.test(t)) return "guitar";
+  if (/flower|plant|garden|florist/.test(t)) return "flower";
+  if (/bowl|game|arcade|golf/.test(t)) return "bowling";
+  if (/sail|boat|kayak|paddle|beach/.test(t)) return "sail";
+  return "pizza";
+}
+
+/** An item with everything a screen needs around it. */
+export type ItemDetail = {
+  item: Item;
+  auction: Auction;
+  business: Business;
+  student: Student | null;
+  team: Team | null;
+};
+
+export async function getItemDetail(itemId: string): Promise<ItemDetail | null> {
+  const db = getDB();
+  const item = db.items.find((i) => i.id === itemId);
+  if (!item) return null;
+  const auction = db.auctions.find((a) => a.id === item.auctionId)!;
+  const business = db.businesses.find((b) => b.id === item.businessId)!;
+  const student = db.students.find((s) => s.id === item.studentId) ?? null;
+  const team = student ? (db.teams.find((t) => t.id === student.teamId) ?? null) : null;
+  return { item: { ...item }, auction, business, student, team };
+}
+
+export async function listItemDetails(auctionId: string, opts: { includePending?: boolean } = {}): Promise<ItemDetail[]> {
+  const items = await listItems(auctionId, opts);
+  return (await Promise.all(items.map((i) => getItemDetail(i.id)))).filter((x): x is ItemDetail => !!x);
+}
+
+export async function getTeam(teamId: string): Promise<Team | null> {
+  return getDB().teams.find((t) => t.id === teamId) ?? null;
+}
+
+export async function getSquad(squadId: string | null): Promise<Squad | null> {
+  if (!squadId) return null;
+  return getDB().squads.find((s) => s.id === squadId) ?? null;
+}
+
+/** A student's points, items and rank within their grade. */
+export async function getStudentSummary(studentId: string) {
+  const db = getDB();
+  const student = db.students.find((s) => s.id === studentId);
+  if (!student) return null;
+  const team = db.teams.find((t) => t.id === student.teamId)!;
+  const squad = db.squads.find((q) => q.id === student.squadId) ?? null;
+  const board = await getLeaderboard(student.auctionId);
+  const inTeam = board.students.filter((s) => s.teamId === team.id);
+  const me = board.students.find((s) => s.studentId === studentId)!;
+  const teamRank = board.teams.findIndex((t) => t.id === team.id) + 1;
+  return {
+    student,
+    team,
+    squad,
+    points: me.points,
+    itemsSecured: me.items,
+    bidsOnItems: me.bids,
+    rankInTeam: inTeam.findIndex((s) => s.studentId === studentId) + 1,
+    teamSize: inTeam.length,
+    teamRank,
+    teamCount: board.teams.length,
+    items: db.items.filter((i) => i.studentId === studentId),
+  };
+}
+
 // ── Bidders & bids ───────────────────────────────────────────────────────
+
+export const bidderInput = z.object({
+  displayName: z.string().trim().min(2, "Enter your name").max(40),
+  town: z.string().trim().min(2, "Enter your town").max(40),
+  phone: z
+    .string()
+    .trim()
+    .regex(/^[\d\s()+.-]{10,20}$/, "Enter a mobile number"),
+  smsOptIn: z.literal(true, { error: "Tick the box so we can text you if you're outbid" }),
+  adult: z.literal(true, { error: "Bidders must be 18 or older" }),
+});
+
+/** Phase 1 stand-in for phone verification: the code step is mocked in the UI. */
+export async function createBidder(input: z.input<typeof bidderInput>): Promise<Bidder> {
+  const data = bidderInput.parse(input);
+  return mutate((db) => {
+    const digits = data.phone.replace(/\D/g, "");
+    const existing = db.bidders.find((b) => b.phone.replace(/\D/g, "").endsWith(digits.slice(-10)));
+    if (existing) return { ...existing };
+    const b: Bidder = {
+      id: newId("bdr"),
+      createdAt: nowISO(),
+      userId: null,
+      displayName: data.displayName,
+      town: data.town,
+      phone: `+1${digits.slice(-10)}`,
+      smsOptIn: true,
+    };
+    db.bidders.push(b);
+    return b;
+  });
+}
 
 export async function getBidder(id: string): Promise<Bidder | null> {
   return getDB().bidders.find((b) => b.id === id) ?? null;
@@ -579,4 +685,100 @@ export async function getBusinessLeaderboard(auctionId: string) {
       };
     })
     .sort((a, b) => b.raisedCents - a.raisedCents);
+}
+
+// ── Setup wizard ─────────────────────────────────────────────────────────
+
+/** Creates a live auction with the four default grade teams and Faculty & Staff. */
+export async function createAuction(input: {
+  name: string;
+  schoolName: string;
+  opensAt: string;
+  closesAt: string;
+  nonprofit: { slug: string; name: string; ein: string };
+  allowCustomSquads: boolean;
+  socialHandle: string | null;
+  approverName: string | null;
+}): Promise<Auction> {
+  return mutate((db) => {
+    const base =
+      input.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "") || "auction";
+    let slug = base;
+    for (let n = 2; db.auctions.some((a) => a.slug === slug); n++) slug = `${base}-${n}`;
+    const id = newId("auc");
+    const a: Auction = {
+      id,
+      createdAt: nowISO(),
+      slug,
+      name: input.name.trim(),
+      schoolName: input.schoolName.trim(),
+      opensAt: input.opensAt,
+      closesAt: input.closesAt,
+      status: "live",
+      nonprofitSlug: input.nonprofit.slug,
+      nonprofitName: input.nonprofit.name,
+      nonprofitEin: input.nonprofit.ein,
+      everyorgFundraiserId: null,
+      allowCustomSquads: input.allowCustomSquads,
+      minIncrementCents: 1000,
+      socialHandle: input.socialHandle,
+      approverName: input.approverName,
+      reachFamilies: 0,
+      reachFollowers: 0,
+      organizerId: "usr-organizer",
+    };
+    db.auctions.push(a);
+    defaultGradeTeams(new Date()).forEach((g) =>
+      db.teams.push({ id: newId("team"), createdAt: nowISO(), auctionId: id, name: g.name, label: g.label, kind: "grade", classYear: g.classYear, sortOrder: g.sortOrder }),
+    );
+    db.teams.push({ id: newId("team"), createdAt: nowISO(), auctionId: id, name: "Faculty & Staff", label: "Faculty & Staff", kind: "faculty", classYear: null, sortOrder: 4 });
+    return a;
+  });
+}
+
+// ── Prize passes ─────────────────────────────────────────────────────────
+
+/** Short code printed under the QR for manual entry when a camera won't scan. */
+export function passCode(token: string) {
+  return token.slice(-6).toUpperCase();
+}
+
+export type PassDetail = { win: Win; item: Item; business: Business; auction: Auction; bidderName: string };
+
+export async function getPassDetail(token: string): Promise<PassDetail | null> {
+  const db = getDB();
+  const win = db.wins.find((w) => w.passToken === token);
+  if (!win) return null;
+  const item = db.items.find((i) => i.id === win.itemId)!;
+  return {
+    win: { ...win },
+    item: { ...item },
+    business: db.businesses.find((b) => b.id === item.businessId)!,
+    auction: db.auctions.find((a) => a.id === item.auctionId)!,
+    bidderName: db.bidders.find((b) => b.id === win.bidderId)?.displayName ?? "Winner",
+  };
+}
+
+/** Accepts a scanned pass URL, a raw token, or the 6-character code. */
+export async function lookupPass(input: string): Promise<PassDetail | null> {
+  const text = input.trim();
+  const fromUrl = text.match(/pass\/([A-Za-z0-9_]+)/)?.[1];
+  const token = fromUrl ?? text;
+  const db = getDB();
+  const win =
+    db.wins.find((w) => w.passToken === token) ??
+    (token.length >= 4 && token.length <= 8 ? db.wins.find((w) => passCode(w.passToken) === token.toUpperCase()) : undefined);
+  return win ? getPassDetail(win.passToken) : null;
+}
+
+/** Wins for one auction, with names, for the organizer. */
+export async function listWins(auctionId: string) {
+  const db = getDB();
+  return db.wins
+    .map((w) => ({ win: w, item: db.items.find((i) => i.id === w.itemId)! }))
+    .filter((x) => x.item && x.item.auctionId === auctionId)
+    .map((x) => ({ ...x, bidderName: db.bidders.find((b) => b.id === x.win.bidderId)?.displayName ?? "Winner" }));
 }

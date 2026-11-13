@@ -34,3 +34,13 @@ export function timeLeft(closesAt: string, now: Date = new Date()) {
   if (d > 0) return `${d}d ${h}h left`;
   return `${h}h ${m % 60}m left`;
 }
+
+/** plural(1, "item") → "1 item", plural(3, "item") → "3 items", plural(2, "person", "people") → "2 people". */
+export function plural(n: number, one: string, many = `${one}s`) {
+  return `${n} ${n === 1 ? one : many}`;
+}
+
+/** "Redwood Slice Co." + "." → no doubled period. */
+export function sentence(text: string) {
+  return /[.!?]$/.test(text.trim()) ? text.trim() : `${text.trim()}.`;
+}

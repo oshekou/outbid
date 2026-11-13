@@ -1,4 +1,6 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
+import { ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { BullWatermark } from "./BullWatermark";
 import { Logo } from "./Logo";
@@ -15,6 +17,8 @@ type GradientHeaderProps = {
   /** Content under the eyebrow row: progress, headline, subtitle. */
   children?: ReactNode;
   watermark?: boolean;
+  /** Show a back chevron linking here. */
+  back?: string;
   className?: string;
 };
 
@@ -29,13 +33,23 @@ export function GradientHeader({
   divider,
   children,
   watermark,
+  back,
   className,
 }: GradientHeaderProps) {
   return (
     <header className={cn("bg-header-gradient relative overflow-hidden text-white", className)}>
       {watermark ? <BullWatermark className="-right-6 top-14 w-56" /> : null}
-      <div className="relative px-5 pt-6 pb-14">
+      <div className="relative px-5 pt-[max(1.5rem,calc(env(safe-area-inset-top)+0.5rem))] pb-14">
         <div className="flex items-center justify-between gap-3">
+          {back ? (
+            <Link
+              href={back}
+              aria-label="Back"
+              className="-ml-2 grid size-10 shrink-0 place-items-center rounded-full bg-white/10 transition hover:bg-white/20 focus-visible:outline-3 focus-visible:outline-lime-400"
+            >
+              <ChevronLeft className="size-6" aria-hidden="true" />
+            </Link>
+          ) : null}
           <div
             className={cn(
               "min-w-0 flex-1",

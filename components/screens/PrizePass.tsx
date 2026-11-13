@@ -1,5 +1,6 @@
 "use client";
 
+import { scrollAppToTop } from "@/components/app/DeviceFrame";
 import { useMemo, useState } from "react";
 import { Check, Clock, MapPin, Share, SquarePlus } from "lucide-react";
 import { BusinessLogo, ItemArt } from "@/components/app/ItemArt";
@@ -90,7 +91,7 @@ export function PrizePass() {
                 await markWinPaid(win.id);
                 setPaying(false);
                 toast("Payment confirmed. Here's your pass!");
-                window.scrollTo({ top: 0 });
+                scrollAppToTop();
               }}
             >
               Complete demo payment
@@ -229,7 +230,7 @@ function Confetti() {
     [],
   );
   return (
-    <div className="pointer-events-none fixed inset-x-0 top-0 z-20 mx-auto h-dvh max-w-[480px] overflow-hidden" aria-hidden="true">
+    <div className="pointer-events-none fixed inset-x-0 top-0 z-20 mx-auto h-[var(--app-h)] max-w-[480px] overflow-hidden" aria-hidden="true">
       {pieces.map((p, i) => (
         <span
           key={i}

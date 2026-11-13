@@ -89,15 +89,14 @@ a {
   background: color-mix(in srgb, var(--color-lime-400) 45%, transparent);
 }
 
-/* Screens slide up slightly as they appear. */
+/* Screens fade in as they appear. Opacity only: a transform here would trap
+ * position: fixed children (tab bar, sheets) inside the scrolling page. */
 @keyframes screen-in {
   from {
     opacity: 0;
-    transform: translateY(10px);
   }
   to {
     opacity: 1;
-    transform: none;
   }
 }
 @utility animate-screen-in {
@@ -192,5 +191,139 @@ a {
     animation-duration: 1ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 1ms !important;
+  }
+}
+
+/* ── Phone frame ──────────────────────────────────────────────────────────
+ * Layout values every screen reads instead of the raw viewport:
+ *   --app-h        height of the app's screen
+ *   --safe-top     space for the status bar / notch
+ *   --safe-bottom  space for the home indicator
+ * On a real phone they come from the browser. Inside the desktop frame,
+ * .device-screen overrides them. */
+:root {
+  --app-h: 100dvh;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Phones: the frame wrappers are plain blocks; the page scrolls normally. */
+.device-aside,
+.device-statusbar,
+.device-home {
+  display: none;
+}
+
+@media (min-width: 640px) and (min-height: 560px) {
+  html,
+  body {
+    height: 100%;
+    overflow: hidden;
+  }
+  body {
+    background:
+      radial-gradient(circle at 15% 20%, color-mix(in srgb, var(--color-lime-400) 22%, transparent) 0, transparent 38%),
+      radial-gradient(circle at 85% 85%, color-mix(in srgb, var(--color-blue-600) 18%, transparent) 0, transparent 42%),
+      #eef3fa;
+  }
+
+  .device-stage {
+    display: flex;
+    height: 100dvh;
+    align-items: center;
+    justify-content: center;
+    gap: 72px;
+    padding: 24px;
+  }
+
+  /* The phone body. */
+  .device {
+    flex-shrink: 0;
+    padding: 11px;
+    border-radius: 62px;
+    background: linear-gradient(145deg, #2b3445, #0b1220 45%, #1b2333);
+    box-shadow:
+      0 0 0 2px #3a4456,
+      0 40px 80px -20px rgb(6 28 67 / 0.45),
+      0 18px 36px -18px rgb(6 28 67 / 0.5);
+  }
+
+  .device-screen {
+    --app-h: min(844px, calc(100dvh - 70px));
+    --safe-top: 50px;
+    --safe-bottom: 22px;
+    position: relative;
+    width: 390px;
+    height: var(--app-h);
+    overflow: hidden;
+    border-radius: 51px;
+    background: var(--color-surface);
+    /* Makes this the containing block for position: fixed descendants. */
+    transform: translateZ(0);
+  }
+
+  .device-scroll {
+    height: 100%;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+  .device-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .device-statusbar {
+    position: absolute;
+    inset: 0 0 auto 0;
+    z-index: 60;
+    display: flex;
+    height: 50px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 22px 0;
+    color: white;
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    pointer-events: none;
+    transition: background-color 200ms ease;
+  }
+  /* Once you scroll, the status bar gets a solid backing so it stays readable. */
+  .device-statusbar--solid {
+    background: var(--color-navy-900);
+  }
+
+  .device-island {
+    width: 120px;
+    height: 34px;
+    border-radius: 999px;
+    background: #000;
+  }
+
+  .device-home {
+    display: block;
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    z-index: 60;
+    width: 134px;
+    height: 5px;
+    border-radius: 999px;
+    background: rgb(6 28 67 / 0.85);
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  /* Inside the phone, screens fill its width. */
+  .device-screen [data-app-scroll] > * {
+    max-width: none;
+  }
+}
+
+/* Room for the "about this preview" panel beside the phone. */
+@media (min-width: 1024px) and (min-height: 560px) {
+  .device-aside {
+    display: block;
+    max-width: 380px;
   }
 }

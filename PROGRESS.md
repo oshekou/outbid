@@ -8,6 +8,15 @@ Running log against `BUILD_PLAN.md`. Newest at the top.
 
 Live at https://outbid-eta.vercel.app (Vercel deploys this branch on every push).
 
+**Phone frame**
+- On screens wider than a phone, the app renders inside a phone (bezel, status bar, camera
+  island, home indicator) and scrolls inside it; the browser page itself never scrolls.
+  Tab bar, toasts and bottom sheets stay pinned inside the phone. On a real phone there's no
+  frame and the app is full-screen. Pure CSS switch (`.device-*` in `app/globals.css`).
+- Big screens also show a side panel with a QR code to open the current screen on a phone.
+- Screens read `--app-h`, `--safe-top` and `--safe-bottom` instead of the raw viewport, so the
+  frame can supply its own values.
+
 **App feel**
 - Installable: web app manifest, home-screen icon (the tag mark from the logo), full-screen launch,
   safe-area padding for notched phones, theme colour.

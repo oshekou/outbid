@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Poppins } from "next/font/google";
+import { DeviceFrame } from "@/components/app/DeviceFrame";
 import { ToastProvider } from "@/components/app/Toast";
 import "./globals.css";
 
@@ -36,7 +37,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${inter.variable} ${poppins.variable} h-full antialiased`}>
       <body className="min-h-full">
-        <ToastProvider>{children}</ToastProvider>
+        <DeviceFrame>
+          <ToastProvider>{children}</ToastProvider>
+        </DeviceFrame>
       </body>
     </html>
   );

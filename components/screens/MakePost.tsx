@@ -1,5 +1,6 @@
 "use client";
 
+import { scrollAppToTop } from "@/components/app/DeviceFrame";
 import Link from "next/link";
 import { useState } from "react";
 import { CircleCheck, ShieldCheck } from "lucide-react";
@@ -74,7 +75,7 @@ export function MakePost() {
     try {
       await submitPost({ itemId: item.id, studentId: me!.id, format, caption: text });
       setSent(true);
-      window.scrollTo({ top: 0 });
+      scrollAppToTop();
     } catch {
       toast("Write a caption first", "error");
     }

@@ -1,5 +1,6 @@
 "use client";
 
+import { scrollAppToTop } from "@/components/app/DeviceFrame";
 import { useRef, useState } from "react";
 import { Camera, CircleCheck, Star } from "lucide-react";
 import { NotFound, ScreenSkeleton } from "@/components/app/States";
@@ -89,7 +90,7 @@ export function DonateItem() {
     setViewer({ businessToken: business.dashboardToken });
     setBusy(false);
     setDone(business);
-    window.scrollTo({ top: 0 });
+    scrollAppToTop();
   }
 
   if (done) {

@@ -22,7 +22,7 @@ export function TabBar({ auctionSlug, active }: { auctionSlug: string; active?: 
   return (
     <nav
       aria-label="Main"
-      className="fixed inset-x-0 bottom-0 z-30 mx-auto max-w-[480px] border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur"
+      className="fixed inset-x-0 bottom-0 z-30 mx-auto max-w-[480px] border-t border-border bg-card/95 pb-[var(--safe-bottom)] backdrop-blur"
     >
       <ul className="grid grid-cols-3">
         {tabs.map(({ key, label, href, icon: Icon }) => {

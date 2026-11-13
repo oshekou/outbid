@@ -20,12 +20,16 @@ export function BottomSheet({
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    // Stop the page (or the framed phone screen) scrolling behind the sheet.
+    const scrollers = [document.body, document.querySelector<HTMLElement>("[data-app-scroll]")].filter(
+      (el): el is HTMLElement => !!el,
+    );
+    const prev = scrollers.map((el) => el.style.overflow);
+    scrollers.forEach((el) => (el.style.overflow = "hidden"));
     ref.current?.querySelector<HTMLElement>("input, button")?.focus();
     return () => {
       window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prev;
+      scrollers.forEach((el, i) => (el.style.overflow = prev[i]!));
     };
   }, [open, onClose]);
 
@@ -43,7 +47,7 @@ export function BottomSheet({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="animate-sheet-in relative w-full max-w-[480px] rounded-t-[28px] bg-surface px-5 pt-3 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-2xl"
+        className="animate-sheet-in relative w-full max-w-[480px] rounded-t-[28px] bg-surface px-5 pt-3 pb-[max(1.5rem,var(--safe-bottom))] shadow-2xl"
       >
         <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-border" aria-hidden="true" />
         <div className="mb-4 flex items-center justify-between gap-3">

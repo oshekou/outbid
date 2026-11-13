@@ -24,8 +24,8 @@ const STEPS = [
 /** Marketing landing page. */
 export default function Home() {
   return (
-    <div className="mx-auto min-h-dvh w-full max-w-[480px] bg-surface shadow-[0_0_0_1px_var(--color-border)]">
-      <header className="bg-header-gradient relative overflow-hidden px-5 pt-[max(1.5rem,calc(env(safe-area-inset-top)+0.5rem))] pb-20 text-white">
+    <div className="mx-auto min-h-[var(--app-h)] w-full max-w-[480px] bg-surface shadow-[0_0_0_1px_var(--color-border)]">
+      <header className="bg-header-gradient relative overflow-hidden px-5 pt-[max(1.5rem,calc(var(--safe-top)+0.5rem))] pb-20 text-white">
         <div className="relative">
           <Logo width={140} priority />
           <h1 className="mt-12 font-display text-[2.9rem] leading-[1.02] font-extrabold tracking-[-0.045em] italic">

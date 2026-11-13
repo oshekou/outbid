@@ -39,7 +39,7 @@ export function GradientHeader({
   return (
     <header className={cn("bg-header-gradient relative overflow-hidden text-white", className)}>
       {watermark ? <BullWatermark className="-right-6 top-14 w-56" /> : null}
-      <div className="relative px-5 pt-[max(1.5rem,calc(env(safe-area-inset-top)+0.5rem))] pb-14">
+      <div className="relative px-5 pt-[max(1.5rem,calc(var(--safe-top)+0.5rem))] pb-14">
         <div className="flex items-center justify-between gap-3">
           {back ? (
             <Link

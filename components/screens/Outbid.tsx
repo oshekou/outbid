@@ -55,8 +55,8 @@ export function Outbid() {
   }
 
   return (
-    <PageShell className="bg-header-gradient animate-screen-in min-h-dvh">
-      <main className="px-4 pt-[max(1.5rem,calc(env(safe-area-inset-top)+0.5rem))] pb-8 text-white">
+    <PageShell className="bg-header-gradient animate-screen-in min-h-[var(--app-h)]">
+      <main className="px-4 pt-[max(1.5rem,calc(var(--safe-top)+0.5rem))] pb-8 text-white">
         <Link href={`/a/${slug}`} aria-label="Outbid home" className="inline-block">
           <Logo width={120} />
         </Link>
